@@ -1,17 +1,46 @@
 name: TEST artifacts
 
-on: [push]
+on:
+  workflow_dispatch:
 
 jobs:
-  artifact:
-    name: TEST artifact
-    runs-on: ubuntu-latest
+  unit-tests:
+    runs-on: ${{ matrix.os }}
+    container: ${{ matrix.container }}
+    env:
+      HELM_SECRETS_WINDOWS_SHELL: ${{ matrix.shell == 'wsl' && 'wsl' || 'bash' }}
+    if: "!contains(github.event.head_commit.message, '[ci skip]')"
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest]
+        container: [""]
+        shell: [dash]
+        jobs: [4]
+        include:
+          - os: windows-latest
+            shell: cygwin
+            jobs: 1
     steps:
-      - shell: bash
-        run: |
-          expr 3 + 7 > math-homework.txt
-      - name: Upload math result for job 1
-        uses: actions/upload-artifact@v1
+      - name: Install dependencies
+        if: "matrix.container"
+        run: |-
+          if command -v apk > /dev/null; then
+            apk add --no-cache curl
+          elif command -v apt-get > /dev/null; then
+            apt-get update -qqy
+            apt-get install -qqy curl
+          fi
+
+
+      - name: Setup Cygwin
+        uses: egor-tensin/setup-cygwin@v3
         with:
-          name: homework
-          path: math-homework.txt
+          platform: x64
+          packages: gnupg2,perl
+      - run: |
+          curl -sSfLJo /usr/local/bin/parallel http://git.savannah.gnu.org/cgit/parallel.git/plain/src/parallel
+          chmod +x /usr/local/bin/parallel
+          parallel --help
+        shell: C:\tools\cygwin\bin\bash.exe --login --norc -eo pipefail -o igncr '{0}'
