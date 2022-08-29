@@ -2,6 +2,7 @@ name: TEST artifacts
 
 on:
   workflow_dispatch:
+  push:
 
 jobs:
   unit-tests:
