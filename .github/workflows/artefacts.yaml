@@ -40,7 +40,7 @@ jobs:
           platform: x64
           packages: gnupg2,perl
       - run: |
-          curl -sSfLJo /usr/local/bin/parallel http://git.savannah.gnu.org/cgit/parallel.git/plain/src/parallel
-          chmod +x /usr/local/bin/parallel
+          curl -sSfLJo /usr/bin/parallel http://git.savannah.gnu.org/cgit/parallel.git/plain/src/parallel
+          chmod +x /usr/bin/parallel
           parallel --help
         shell: C:\tools\cygwin\bin\bash.exe --login --norc -eo pipefail -o igncr '{0}'
